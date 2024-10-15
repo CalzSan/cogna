@@ -1,0 +1,597 @@
+<html><head><base href="https://carta-batalha-aprimorada-calzsan.com/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Batalha de Cartas Aprimorada - By Calzsan</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #1a237e;
+        color: #ffffff;
+    }
+    .game-container, .loading-screen, .deck-selection, .battle-screen, .shop, .nickname-selection, .lobby, .leagues-screen, .events-screen {
+        text-align: center;
+        background-color: #303f9f;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    }
+    .loading-screen {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+        width: 300px;
+    }
+    .card-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 20px 0;
+    }
+    .card {
+        width: 50px;
+        height: 75px;
+        margin: 5px;
+        background-color: #c5cae9;
+        color: #1a237e;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: transform 0.2s;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .card:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+    }
+    .card.selected {
+        border: 3px solid #ff4081;
+    }
+    .score {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    #message {
+        margin-top: 20px;
+        font-size: 18px;
+    }
+    #target-number {
+        font-size: 36px;
+        font-weight: bold;
+        margin: 20px 0;
+    }
+    #play-again, #start-game, #confirm-nickname, .navigation button, .back-button {
+        background-color: #ff4081;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 20px;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    #play-again:hover, #start-game:hover, #confirm-nickname:hover, .navigation button:hover, .back-button:hover {
+        background-color: #f50057;
+        transform: scale(1.05);
+    }
+    .star {
+        color: #ffd54f;
+        text-shadow: 0 0 5px rgba(255,213,79,0.5);
+    }
+    .loading-spinner {
+        border: 5px solid #c5cae9;
+        border-top: 5px solid #ff4081;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .copyright {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        font-size: 12px;
+        color: #c5cae9;
+    }
+    .league-info {
+        margin-top: 20px;
+        font-size: 18px;
+    }
+    .trophy-change {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    .player-info {
+        margin-bottom: 20px;
+    }
+    .navigation button {
+        margin: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #3f51b5;
+        color: white;
+        border: none;
+        border-radius: 5px;
+    }
+    .navigation button:hover {
+        background-color: #5c6bc0;
+    }
+    .back-button {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 20px;
+    }
+    .back-button:hover {
+        background-color: #e53935;
+    }
+</style>
+</head>
+<body>
+<div class="loading-screen" id="loading-screen">
+    <h2>Carregando o jogo...</h2>
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="nickname-selection" id="nickname-selection" style="display: none;">
+    <h2>Escolha seu apelido</h2>
+    <input type="text" id="nickname-input" placeholder="Seu apelido">
+    <button id="confirm-nickname">Confirmar</button>
+</div>
+
+<div class="lobby" id="lobby" style="display: none;">
+    <h2>Bem-vindo, <span id="player-nickname"></span>!</h2>
+    <div class="player-info">
+        <p>Nível: <span id="player-level">1</span></p>
+        <p>Experiência: <span id="player-xp">0</span> / <span id="xp-to-next-level">100</span></p>
+        <p>Troféus: <span id="player-trophies">0</span></p>
+        <p>Liga: <span id="player-league">Sem Liga</span></p>
+    </div>
+    <div class="navigation">
+        <button id="nav-leagues">Ligas e Troféus</button>
+        <button id="nav-shop">Loja</button>
+        <button id="nav-events">Eventos</button>
+        <button id="nav-deck">Montar Deck</button>
+        <button id="nav-battle">Batalha</button>
+    </div>
+</div>
+
+<div class="leagues-screen" id="leagues-screen" style="display: none;">
+    <h2>Ligas e Troféus</h2>
+    <div id="leagues-list"></div>
+    <button class="back-button">Voltar</button>
+</div>
+
+<div class="events-screen" id="events-screen" style="display: none;">
+    <h2>Eventos</h2>
+    <button class="back-button">Voltar</button>
+</div>
+
+<div class="deck-selection" id="deck-selection" style="display: none;">
+    <h2>Selecione 3 cartas para o seu deck</h2>
+    <div class="card-container" id="deck-container"></div>
+    <button id="start-game" style="display: none;">Ir para a Batalha</button>
+    <button class="back-button">Voltar</button>
+</div>
+
+<div class="battle-screen" id="battle-screen" style="display: none;">
+    <h2>Batalha de Cartas</h2>
+    <div class="score">
+        Jogador: <span id="player-score">0</span><span id="player-stars"></span> | Máquina: <span id="computer-score">0</span><span id="computer-stars"></span>
+    </div>
+    <div id="target-number">?</div>
+    <div class="card-container" id="player-hand"></div>
+    <div id="computer-card"></div>
+    <div id="message"></div>
+    <button id="play-again" style="display: none;">Jogar Novamente</button>
+    <div class="league-info">
+        <p>Troféus: <span id="trophies">0</span></p>
+        <p>Liga: <span id="league">Sem Liga</span></p>
+    </div>
+    <button class="back-button">Voltar</button>
+</div>
+
+<div class="shop" id="shop" style="display: none;">
+    <h2>Loja</h2>
+    <div id="shop-items"></div>
+    <p>Moedas: <span id="player-coins">0</span></p>
+    <button class="back-button">Voltar</button>
+</div>
+
+<div class="copyright">By Calzsan</div>
+
+<script>
+    const cards = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const cardValues = {
+        'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7,
+        '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13
+    };
+    let playerNickname = '';
+    let playerScore = 0;
+    let computerScore = 0;
+    let roundsPlayed = 0;
+    let playerDeck = [];
+    let computerDeck = [];
+    let playerCoins = 0;
+    let playerTrophies = 0;
+    let playerLevel = 1;
+    let playerXP = 0;
+    const xpToNextLevel = 100;
+    const leagues = [
+        { name: "Sem Liga", threshold: 0 },
+        { name: "Liga Expelunca", threshold: 400 },
+        { name: "Liga Major", threshold: 800 },
+        { name: "Liga Platina", threshold: 1200 },
+        { name: "Liga Soldado", threshold: 2200 },
+        { name: "Liga Cafajeste", threshold: 3100 },
+        { name: "Liga Senhor", threshold: 4000 },
+        { name: "Liga Rabiscada", threshold: 5300 },
+        { name: "Liga Pretina", threshold: 6000 },
+        { name: "Liga Soberana", threshold: 8000 }
+    ];
+
+    function showLoadingScreen() {
+        document.getElementById('loading-screen').style.display = 'flex';
+        setTimeout(() => {
+            document.getElementById('loading-screen').style.display = 'none';
+            if (loadGameState()) {
+                showLobby();
+            } else {
+                document.getElementById('nickname-selection').style.display = 'block';
+            }
+        }, 5000);
+    }
+
+    function confirmNickname() {
+        playerNickname = document.getElementById('nickname-input').value.trim();
+        if (playerNickname) {
+            document.getElementById('nickname-selection').style.display = 'none';
+            showLobby();
+        } else {
+            alert('Por favor, escolha um apelido válido.');
+        }
+    }
+
+    function showLobby() {
+        document.getElementById('lobby').style.display = 'block';
+        document.getElementById('player-nickname').textContent = playerNickname;
+        updatePlayerInfo();
+    }
+
+    function updatePlayerInfo() {
+        document.getElementById('player-level').textContent = playerLevel;
+        document.getElementById('player-xp').textContent = playerXP;
+        document.getElementById('xp-to-next-level').textContent = xpToNextLevel;
+        document.getElementById('player-trophies').textContent = playerTrophies;
+        document.getElementById('player-league').textContent = getCurrentLeague();
+    }
+
+    function getCurrentLeague() {
+        for (let i = leagues.length - 1; i >= 0; i--) {
+            if (playerTrophies >= leagues[i].threshold) {
+                return leagues[i].name;
+            }
+        }
+        return "Sem Liga";
+    }
+
+    function navigateTo(screen) {
+        const screens = ['lobby', 'leagues-screen', 'shop', 'events-screen', 'deck-selection', 'battle-screen'];
+        screens.forEach(s => document.getElementById(s).style.display = 'none');
+        document.getElementById(screen).style.display = 'block';
+        if (screen === 'leagues-screen') showLeaguesAndTrophies();
+        if (screen === 'shop') openShop();
+    }
+
+    function goBack() {
+        navigateTo('lobby');
+    }
+
+    document.querySelectorAll('.back-button').forEach(button => {
+        button.addEventListener('click', goBack);
+    });
+
+    function createDeckSelection() {
+        const deckContainer = document.getElementById('deck-container');
+        deckContainer.innerHTML = '';
+        cards.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.classList.add('card');
+            cardElement.textContent = card;
+            cardElement.addEventListener('click', () => selectCard(cardElement, card));
+            deckContainer.appendChild(cardElement);
+        });
+    }
+
+    function selectCard(cardElement, card) {
+        if (playerDeck.length < 3 && !cardElement.classList.contains('selected')) {
+            cardElement.classList.add('selected');
+            playerDeck.push(card);
+        } else if (cardElement.classList.contains('selected')) {
+            cardElement.classList.remove('selected');
+            playerDeck = playerDeck.filter(c => c !== card);
+        }
+
+        if (playerDeck.length === 3) {
+            document.getElementById('start-game').style.display = 'inline-block';
+        } else {
+            document.getElementById('start-game').style.display = 'none';
+        }
+    }
+
+    function startGame() {
+        document.getElementById('deck-selection').style.display = 'none';
+        document.getElementById('battle-screen').style.display = 'block';
+        createPlayerHand();
+        generateComputerDeck();
+        playRound();
+    }
+
+    function createPlayerHand() {
+        const playerHand = document.getElementById('player-hand');
+        playerHand.innerHTML = '';
+        playerDeck.forEach(card => {
+            const cardElement = document.createElement('div');
+            cardElement.classList.add('card');
+            cardElement.innerHTML = card;
+            cardElement.addEventListener('click', () => playCard(card));
+            playerHand.appendChild(cardElement);
+        });
+    }
+
+    function generateComputerDeck() {
+        computerDeck = [];
+        for (let i = 0; i < 3; i++) {
+            const randomCard = cards[Math.floor(Math.random() * cards.length)];
+            computerDeck.push(randomCard);
+        }
+    }
+
+    function playCard(playerCard) {
+        const targetNumber = generateTargetNumber();
+        const computerCard = computerPlay();
+
+        document.getElementById('target-number').textContent = '?';
+        displayMessage(`Jogador escolheu ${playerCard}, Máquina escolheu ${computerCard}. Revelando número alvo...`);
+        document.getElementById('computer-card').textContent = `Carta da Máquina: ${computerCard}`;
+
+        setTimeout(() => {
+            const targetNumberElement = document.getElementById('target-number');
+            targetNumberElement.textContent = `Número Alvo: ${targetNumber}`;
+
+            const playerNumberDiff = Math.abs(cardValues[playerCard] - targetNumber);
+            const computerNumberDiff = Math.abs(cardValues[computerCard] - targetNumber);
+
+            let roundWinner;
+            if (playerNumberDiff < computerNumberDiff) {
+                playerScore++;
+                roundWinner = 'Jogador';
+                document.getElementById('player-stars').innerHTML += '<span class="star">★</span>';
+            } else if (computerNumberDiff < playerNumberDiff) {
+                computerScore++;
+                roundWinner = 'Máquina';
+                document.getElementById('computer-stars').innerHTML += '<span class="star">★</span>';
+            } else {
+                roundWinner = 'Empate';
+            }
+
+            roundsPlayed++;
+            updateScore();
+            displayMessage(`Jogador escolheu ${playerCard}, Máquina escolheu ${computerCard}. ${roundWinner} vence a rodada!`);
+
+            playerDeck = playerDeck.filter(c => c !== playerCard);
+            createPlayerHand();
+
+            if (playerScore >= 2 || computerScore >= 2 || roundsPlayed === 3) {
+                endGame();
+            } else {
+                setTimeout(playRound, 2000);
+            }
+        }, 3000);
+    }
+
+    function generateTargetNumber() {
+        return Math.floor(Math.random() * 13) + 1;
+    }
+
+    function computerPlay() {
+        const randomIndex = Math.floor(Math.random() * computerDeck.length);
+        const chosenCard = computerDeck[randomIndex];
+        computerDeck.splice(randomIndex, 1);
+        return chosenCard;
+    }
+
+    function updateScore() {
+        document.getElementById('player-score').textContent = playerScore;
+        document.getElementById('computer-score').textContent = computerScore;
+    }
+
+    function displayMessage(msg) {
+        document.getElementById('message').textContent = msg;
+    }
+
+    function endGame() {
+        const playerHand = document.getElementById('player-hand');
+        playerHand.innerHTML = '';
+
+        let winner;
+        if (playerScore > computerScore) {
+            winner = 'Jogador';
+            const trophyGain = Math.floor(Math.random() * 5) + 28;
+            playerTrophies += trophyGain;
+            playerXP += 50; // Add XP for winning
+            displayMessage(`Fim de jogo! ${winner} vence a partida! Você ganhou ${trophyGain} troféus.`);
+        } else if (computerScore > playerScore) {
+            winner = 'Máquina';
+            const trophyLoss = Math.floor(Math.random() * 7) + 24;
+            playerTrophies = Math.max(0, playerTrophies - trophyLoss);
+            playerXP += 20; // Add some XP for participating
+            displayMessage(`Fim de jogo! ${winner} vence a partida! Você perdeu ${trophyLoss} troféus.`);
+        } else {
+            winner = 'Empate';
+            displayMessage(`Fim de jogo! ${winner}!`);
+        }
+
+        checkLevelUp();
+        updateLeague();
+        saveGameState();
+        document.getElementById('play-again').style.display = 'inline-block';
+    }
+
+    function updateLeague() {
+        const trophiesElement = document.getElementById('trophies');
+        const leagueElement = document.getElementById('league');
+        trophiesElement.textContent = playerTrophies;
+
+        for (let i = leagues.length - 1; i >= 0; i--) {
+            if (playerTrophies >= leagues[i].threshold) {
+                leagueElement.textContent = leagues[i].name;
+                break;
+            }
+        }
+    }
+
+    function checkLevelUp() {
+        if (playerXP >= xpToNextLevel) {
+            playerLevel++;
+            playerXP -= xpToNextLevel;
+            alert(`Parabéns! Você subiu para o nível ${playerLevel}!`);
+        }
+        updatePlayerInfo();
+    }
+
+    function resetGame() {
+        playerScore = 0;
+        computerScore = 0;
+        roundsPlayed = 0;
+        playerDeck = [];
+        computerDeck = [];
+        updateScore();
+        document.getElementById('target-number').textContent = '?';
+        displayMessage('');
+        document.getElementById('play-again').style.display = 'none';
+        document.getElementById('player-stars').innerHTML = '';
+        document.getElementById('computer-stars').innerHTML = '';
+        document.getElementById('computer-card').textContent = '';
+        updateLeague();
+        document.getElementById('battle-screen').style.display = 'none';
+        document.getElementById('deck-selection').style.display = 'block';
+        createDeckSelection();
+    }
+
+    function saveGameState() {
+        const gameState = {
+            playerNickname,
+            playerCoins,
+            playerTrophies,
+            playerLevel,
+            playerXP
+        };
+        localStorage.setItem('gameState', JSON.stringify(gameState));
+    }
+
+    function loadGameState() {
+        const savedState = localStorage.getItem('gameState');
+        if (savedState) {
+            const gameState = JSON.parse(savedState);
+            playerNickname = gameState.playerNickname;
+            playerCoins = gameState.playerCoins;
+            playerTrophies = gameState.playerTrophies;
+            playerLevel = gameState.playerLevel;
+            playerXP = gameState.playerXP;
+            return true;
+        }
+        return false;
+    }
+
+    function openShop() {
+        const shopContainer = document.getElementById('shop-items');
+        shopContainer.innerHTML = '';
+        shopItems.forEach(item => {
+            const itemElement = document.createElement('div');
+            itemElement.innerHTML = `
+                <h3>${item.name}</h3>
+                <p>${item.description}</p>
+                <p>Preço: ${item.price} moedas</p>
+                <button onclick="buyItem('${item.name}')">Comprar</button>
+            `;
+            shopContainer.appendChild(itemElement);
+        });
+        document.getElementById('player-coins').textContent = playerCoins;
+        document.getElementById('shop').style.display = 'block';
+    }
+
+    const shopItems = [
+        { name: 'Carta Coringa', price: 5, description: 'Substitui qualquer carta no seu deck' },
+        { name: 'Proteção contra Eventos', price: 3, description: 'Ignora o próximo evento negativo' },
+        { name: 'Aumento de Mão', price: 7, description: 'Aumenta o tamanho do seu deck em 1' }
+    ];
+
+    function buyItem(itemName) {
+        const item = shopItems.find(i => i.name === itemName);
+        if (playerCoins >= item.price) {
+            playerCoins -= item.price;
+            displayMessage(`Você comprou ${item.name}!`);
+            document.getElementById('player-coins').textContent = playerCoins;
+        } else {
+            displayMessage('Moedas insuficientes para comprar este item.');
+        }
+    }
+
+    document.getElementById('confirm-nickname').addEventListener('click', confirmNickname);
+    document.getElementById('start-game').addEventListener('click', startGame);
+    document.getElementById('play-again').addEventListener('click', resetGame);
+    document.getElementById('nav-leagues').addEventListener('click', () => navigateTo('leagues-screen'));
+    document.getElementById('nav-shop').addEventListener('click', () => navigateTo('shop'));
+    document.getElementById('nav-events').addEventListener('click', () => navigateTo('events-screen'));
+    document.getElementById('nav-deck').addEventListener('click', () => navigateTo('deck-selection'));
+    document.getElementById('nav-battle').addEventListener('click', () => navigateTo('battle-screen'));
+
+    function showLeaguesAndTrophies() {
+        const leaguesList = document.getElementById('leagues-list');
+        leaguesList.innerHTML = '';
+        leagues.forEach(league => {
+            const leagueElement = document.createElement('div');
+            leagueElement.innerHTML = `
+                <h3>${league.name}</h3>
+                <p>Troféus necessários: ${league.threshold}</p>
+            `;
+            leaguesList.appendChild(leagueElement);
+        });
+    }
+
+    window.onload = function() {
+        showLoadingScreen();
+        createDeckSelection();
+    };
+
+    function playRound() {
+        if (playerDeck.length > 0) {
+            displayMessage('Escolha uma carta para jogar.');
+        } else {
+            endGame();
+        }
+    }
+</script>
+</body></html>
